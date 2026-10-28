@@ -1,91 +1,92 @@
 # Programa: SecuenciaEmpleado.py
 # Objetivo: Mostrar la implementación de la "interdaz" Conjuntable, pata ilustrar la creacón de un TAD de objetos.
-# Autor: Huitzilovers2.0
-# Fecha: 03/09/2026
+#           Tarea 4: el almacenamiento con arreglo de numpy (que se "hacía crecer" duplicando su
+#           capacidad) se sustituyó por una lista simplemente ligada con centinela al inicio
+#           (ListaCentinela.Lista), logrando una organización completamente dinámica.
+# Autor: Huitzilovers2.0 (Tarea 4 - Integrante 1: Emiliano Parra Miranda)
+# Fecha: 03/09/2026 (actualizado: 28/10/2026)
 
 import Secuenciable as s
 import Empleado as e
+import ListaCentinela as lc
 import numpy as np
-from numpy.typing import NDArray
+
 
 class Secuencia(s.Secuenciable):
-    def __init__(self,*params):
-        """
-        Constructor de la secuencia
-        :param params: Si no recib nada el
-        :return: Si no recibe nada es el constructor por omisión.
-                 Sí recibe un parámetro, es el constructor por parámetros.
-        """
-        if len(params) == 0: #constructor por omisión
-            self.__datos=np.empty(20,dtype=e.Empleado)
-            self.__nd = 0
-            print("Se creo una Secuencia para 20 elemntos!")
+    """
+    TAD Secuencia (multiconjunto) de objetos Empleado.
 
-        elif len(params) == 1:
-            if not isinstance(params[0], int) or isinstance(params[0], bool) or params[0] < 1:
-                raise ValueError("El tamaño del arreglo debe ser un entero positivo")
-            self.__datos = np.empty(params[0], dtype=e.Empleado)
-            self.__nd = 0
+    Los elementos se almacenan en una lista simplemente ligada con nodo centinela
+    al inicio, por lo que ya no existe una capacidad máxima: la Secuencia crece y
+    decrece nodo por nodo. Todos los recorridos se hacen mediante el iterador de la lista.
+    """
 
+    def __init__(self, *params):
+        """
+        Constructor de la Secuencia.
+        :param params: Si no recibe nada, es el constructor por omisión (Secuencia vacía).
+                       Si recibe un parámetro, debe ser una Secuencia u otro iterable de
+                       Empleados y funciona como constructor de copia.
+        :raises TypeError: si el parámetro no es iterable, contiene objetos que no son
+                           Empleado o se reciben más de un parámetro.
+        """
+        self.__datos = lc.Lista()
+        if len(params) == 0:  # Constructor por omisión
+            return
+        if len(params) == 1:  # Constructor de copia
+            origen = params[0]
+            if isinstance(origen, (str, bytes)) or not hasattr(origen, "__iter__"):
+                raise TypeError("El constructor recibe una Secuencia o un iterable de Empleados "
+                                "(con listas ya no es necesario indicar una capacidad)")
+            for elemento in origen:
+                self.agregar(elemento)
         else:
             raise TypeError("El constructor recibe 0 o 1 parámetros")
 
-    def __iter__(self):
+    def __iter__(self) -> lc.IteradorLista:
         """
-        Método que permite inicializar el iterador de Secuencias
-        :return: Un objeto iterable
+        Método que devuelve un iterador para recorrer la Secuencia.
+        Se delega al iterador de la lista ligada; cada llamada crea un iterador
+        nuevo e independiente, por lo que se permiten recorridos anidados.
+        :return: Un iterador sobre los Empleados de la Secuencia
+        :rtype: IteradorLista
         """
-        self.pos = 0
-        return self
-
-    def __next__(self)-> e.Empleado:
-        """
-        Método que permite obtener el siguiete elmento de la Secuencia
-        :return: El siguiente elemento de la Secuencia
-        :rtype: int
-        """
-        if self.pos < self.nd:
-            a = self.datos[self.pos]
-            self.pos += 1
-            return a
-        else:
-            raise StopIteration
+        return iter(self.__datos)
 
     @property
-    def datos(self) -> NDArray[e.Empleado]:
+    def datos(self) -> lc.Lista:
         """
-        Metodo GET para obtener el arreglo de datos
-        :return: Empleado[]
+        Metodo GET para obtener la estructura de almacenamiento (lista ligada con centinela).
+        La lista admite len(datos) y datos[i] (acceso O(n) recorriendo los nodos).
+        :return: La lista ligada con los Empleados
+        :rtype: Lista
         """
         return self.__datos
-    @property
-    def nd(self)-> int :
-        """
-        Método GET para obtener el número de datos del conjunto
-        :return: El número de datos insertados en el Conjunto
-        :retype: int
-        """
-        return self.__nd
 
-    def __crecer(self, minimo: int):
+    @property
+    def nd(self) -> int:
         """
-        Duplica la capacidad del arreglo hasta que quepan 'minimo' elementos.
-        :param minimo: Cantidad mínima de elementos que debe poder almacenar
+        Método GET para obtener el número de datos de la Secuencia.
+        :return: El número de datos insertados en la Secuencia
+        :rtype: int
         """
-        cap = len(self.__datos)
-        if minimo <= cap:
-            return
-        cap = max(cap, 1)
-        while cap < minimo:
-            cap *= 2
-        nuevo = np.empty(cap, dtype=e.Empleado)
-        for i in range(self.__nd):
-            nuevo[i] = self.__datos[i]
-        self.__datos = nuevo
+        return self.__datos.longitud()
+
+    def obtener(self, indice: int) -> e.Empleado:
+        """
+        Método que devuelve el Empleado en la posición indicada (0 .. nd-1).
+        :param indice: Posición del Empleado
+        :return: El Empleado en esa posición
+        :raises IndexError: si el índice está fuera de rango
+        """
+        return self.__datos.obtener(indice)
 
     def agregar(self, elemento: e.Empleado, nveces: int = 1):
         """
-        Agrega el elemento 'nveces' veces (por omisión, una).
+        Agrega el elemento 'nveces' veces (por omisión, una) al final de la Secuencia.
+        Cada inserción crea un nodo nuevo en O(1); ya no hay que copiar el arreglo.
+        :param elemento: El Empleado a agregar
+        :param nveces: El número de veces que se agrega
         :raises TypeError: si el elemento no es un Empleado
         :raises ValueError: si nveces no es un entero positivo
         """
@@ -93,16 +94,17 @@ class Secuencia(s.Secuenciable):
             raise TypeError("Solo se pueden agregar objetos Empleado")
         if not isinstance(nveces, int) or isinstance(nveces, bool) or nveces < 1:
             raise ValueError("nveces debe ser un entero positivo")
-        self.__crecer(self.__nd + nveces)
         for _ in range(nveces):
-            self.__datos[self.__nd] = elemento
-            self.__nd += 1
-
+            self.__datos.agregar(elemento)
 
     def eliminar(self, elemento: e.Empleado, nrep: int | None = None):
         """
         Sin nrep: elimina todas las repeticiones del elemento.
         Con nrep: elimina nrep repeticiones; si hay menos de nrep, no hace nada.
+        Los nodos se desconectan en una sola pasada usando un apuntador al nodo
+        anterior que inicia en el centinela (no hay que recorrer/compactar un arreglo).
+        :param elemento: El Empleado a eliminar
+        :param nrep: (Opcional) Número de repeticiones a eliminar
         :raises TypeError: si el elemento no es un Empleado
         :raises ValueError: si nrep no es un entero positivo
         """
@@ -114,39 +116,30 @@ class Secuencia(s.Secuenciable):
         if total == 0 or (nrep is not None and total < nrep):
             return
         por_quitar = total if nrep is None else nrep
-        j = 0
-        quitados = 0
-        for i in range(self.__nd):  # Compacta el arreglo en una sola pasada
-            if quitados < por_quitar and self.__datos[i] == elemento:
-                quitados += 1
-            else:
-                self.__datos[j] = self.__datos[i]
-                j += 1
-        for k in range(j, self.__nd):  # Libera las posiciones sobrantes
-            self.__datos[k] = None
-        self.__nd = j
+        self.__datos.eliminar(elemento, por_quitar)
 
     def contiene(self, elemento: e.Empleado) -> bool:
         """
-        Indica si el elemento está en la Secuencia.
+        Indica si el elemento está en la Secuencia (recorrido con el iterador).
+        :param elemento: El Empleado a buscar
         :return: True si lo encontró, False en otro caso
         :rtype: bool
-
         """
-        for i in range(self.__nd):
-            if self.__datos[i] == elemento:
+        for empleado in self:
+            if empleado == elemento:
                 return True
         return False
 
     def repeticiones(self, elemento: e.Empleado) -> int:
         """
-        Cuenta cuántas veces aparece el elemento en la Secuencia.
+        Cuenta cuántas veces aparece el elemento en la Secuencia (recorrido con el iterador).
+        :param elemento: El Empleado a contar
         :return: El número de repeticiones
         :rtype: int
         """
         cuenta = 0
-        for i in range(self.__nd):
-            if self.__datos[i] == elemento:
+        for empleado in self:
+            if empleado == elemento:
                 cuenta += 1
         return cuenta
 
@@ -154,10 +147,11 @@ class Secuencia(s.Secuenciable):
     def esta_vacia(self) -> bool:
         """
         Método que Verifica si la secuencia está vacía
+        (el centinela no tiene siguiente).
         :return: True si está vacía, False en caso contrario
         :rtype: bool
         """
-        return self.__nd == 0
+        return self.__datos.esta_vacia()
 
     # Función que devuelve la cardinalidad de la secuencia
     def cardinalidad(self) -> int:
@@ -166,29 +160,26 @@ class Secuencia(s.Secuenciable):
         :return: La cantidad de elementos almacenados en la Secuencia (incluyendo repeticiones)
         :rtype: int
         """
-        return self.__nd
+        return self.__datos.longitud()
 
     # Función que permite vaciar la secuencia
     def vaciar(self):
         """
-        Método que permite eliminar todos los elementos de la secuencia, reiniciando el arreglo
-        :return: Una secuencia vacía
+        Método que permite eliminar todos los elementos de la secuencia.
+        Con la lista basta con desconectar el centinela del primer nodo; ya no se
+        crea un arreglo nuevo de la misma capacidad.
         """
-        capacidad_actual = len(self.__datos)
-        self.__datos = np.empty(capacidad_actual, dtype=e.Empleado)
-        self.__nd = 0
+        self.__datos.vaciar()
 
     # Función que crea una secuencia unica
     def secuencia_unica(self):
         """
         Método que permite crear y devolver una secuencia con elementos unicos (sin repeticiones)
         :return: Nueva secuencia sin elementos repetidos
+        :rtype: Secuencia
         """
-        # Se crea con la capacidad del número de elementos actuales o 20 por omisión
-        capacidad_inicial = self.__nd if self.__nd > 0 else 20
-        secu_unica = Secuencia(capacidad_inicial)
-        for i in range(self.__nd):
-            elemento = self.__datos[i]
+        secu_unica = Secuencia()  # Ya no se calcula una capacidad inicial
+        for elemento in self:
             # Utiliza el método contiene
             if not secu_unica.contiene(elemento):
                 secu_unica.agregar(elemento)
@@ -198,8 +189,12 @@ class Secuencia(s.Secuenciable):
     def ordenar(self, comparador=None):
         """
         Método que devuelve la Secuencia de elementos de manera ordenada.
-        Utiliza Quick Sort o Merge Sort y habilita la existencia de dos comparadores
-        :return: La secuencia ordenada
+        Utiliza Quick Sort y habilita la existencia de dos comparadores.
+        Como la lista no tiene acceso aleatorio, primero se vuelca (con el iterador)
+        a un arreglo auxiliar de tamaño exacto y sobre él se aplica Quick Sort.
+        (El Integrante 2 integra la Lista Ordenada del material para la visualización.)
+        :param comparador: Función comparadora (por omisión, nombre_salario)
+        :return: Arreglo con los Empleados ordenados
         :rtype: np.ndarray
         """
         if self.esta_vacia():
@@ -207,21 +202,19 @@ class Secuencia(s.Secuenciable):
         # Criterio por defecto si no se pasa ningún comparador
         if comparador is None:
             comparador = Secuencia.nombre_salario
-        # Tomamos unicamente a los elementos activos, es decir del self.__nd, para no evitar comparar con posiciones vacias
-        copia = self.__datos[:self.__nd].copy()
-        return Secuencia.__quick_sort(copia, 0, self.__nd - 1, comparador)
+        copia = np.empty(self.nd, dtype=e.Empleado)
+        for i, empleado in enumerate(self):
+            copia[i] = empleado
+        return Secuencia.__quick_sort(copia, 0, self.nd - 1, comparador)
 
     # Método str que imprime en formato cadena los elementos de una secuencia
     def __str__(self):
         """
         Método que devuelve la representación en formato str de la secuencia
-        :return: Cadena con la lista de elementos activos
+        :return: Cadena con la lista de elementos
         :rtype: str
         """
-        if self.esta_vacia():
-            return "[]"
-        elementos_str = [str(self.__datos[i]) for i in range(self.__nd)]
-        return "[" + ", ".join(elementos_str) + "]"
+        return str(self.__datos)
 
     # Método eq que compara una secuencia con otra
     def __eq__(self, otro) -> bool:
@@ -236,9 +229,7 @@ class Secuencia(s.Secuenciable):
             return False
         if self.cardinalidad() != otro.cardinalidad():
             return False
-        unicos = self.secuencia_unica()
-        for i in range(unicos.nd):
-            elemento = unicos.datos[i]
+        for elemento in self.secuencia_unica():
             if self.repeticiones(elemento) != otro.repeticiones(elemento):
                 return False
         return True
@@ -330,8 +321,3 @@ class Secuencia(s.Secuenciable):
             Secuencia.__quick_sort(arreglo, inicio, posicion_part - 1, comparador)
             Secuencia.__quick_sort(arreglo, posicion_part + 1, fin, comparador)
         return arreglo
-
-    # Posibles cambios aun tengo duda
-    #def ordenar(self,comparador)-> np.ndarray:
-    #    copia = self.datos.copy()
-    #    return Secuencia.__quick_sort(copia,0,self.nd-1,comparador)

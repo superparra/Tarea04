@@ -479,7 +479,7 @@ def opcion_probar_str(secuencia: se.Secuencia):
 
 def opcion_probar_eq(secuencia: se.Secuencia):
     imprimir_encabezado("Opción 15: Probar Método Mágico __eq__")
-    vacia = se.Secuencia(1)
+    vacia = se.Secuencia()
     print(f"  1. secuencia == secuencia vacía      -> {secuencia == vacia}"
           f"   (esperado: {secuencia.nd == 0})")
     print(f"  2. secuencia == ella misma           -> {secuencia == secuencia}   (esperado: True)")
@@ -490,13 +490,13 @@ def opcion_probar_eq(secuencia: se.Secuencia):
         return
 
     # Copia con los mismos empleados pero en orden inverso
-    copia = se.Secuencia(secuencia.nd)
-    for i in range(secuencia.nd - 1, -1, -1):
-        copia.agregar(secuencia.datos[i])
+    copia = se.Secuencia()
+    for emp in reversed([emp for emp in secuencia]):  # recorrido con el iterador
+        copia.agregar(emp)
     print(f"  4. misma colección, distinto orden   -> {secuencia == copia}   (esperado: True)")
 
     # Se agrega una repetición extra: la cardinalidad cambia
-    copia.agregar(secuencia.datos[0])
+    copia.agregar(secuencia.obtener(0))
     print(f"  5. una repetición de más             -> {secuencia == copia}   (esperado: False)")
 
 
@@ -519,19 +519,18 @@ def opcion_guardar_archivo(secuencia: se.Secuencia):
 
 def opcion_crear_secuencia(secuencia: se.Secuencia) -> se.Secuencia:
     imprimir_encabezado("Opción 17: Crear nueva Secuencia (__init__)")
-    print("  1. Constructor por omisión (capacidad 20)")
-    print("  2. Constructor con capacidad n")
+    print("  1. Constructor por omisión (Secuencia vacía, lista dinámica)")
+    print("  2. Constructor de copia (copia la Secuencia actual)")
     opc = input("  Elija una opción [1/2]: ").strip()
     try:
         if opc == "1":
             nueva = se.Secuencia()
         elif opc == "2":
-            n = capturar_entero("  Capacidad inicial: ")
-            nueva = se.Secuencia(n)
+            nueva = se.Secuencia(secuencia)
         else:
             print("  [Error]: Opción no válida.")
             return secuencia
-        print(f"  [Éxito]: Nueva Secuencia con capacidad {len(nueva.datos)} y {nueva.nd} elementos.")
+        print(f"  [Éxito]: Nueva Secuencia con {nueva.nd} elementos (sin capacidad máxima).")
         print("  (La Secuencia anterior fue reemplazada.)")
         return nueva
     except Exception as err:
@@ -546,7 +545,8 @@ def opcion_probar_excepciones(secuencia: se.Secuencia):
         ("agregar(emp, 0)         [nveces invalido]", lambda: secuencia.agregar(emp, 0)),
         ("eliminar(emp, -1)       [nrep invalido]", lambda: secuencia.eliminar(emp, -1)),
         ("eliminar(5)             [no es Empleado]", lambda: secuencia.eliminar(5)),
-        ("Secuencia(-5)           [capacidad negativa]", lambda: se.Secuencia(-5)),
+        ("Secuencia(-5)           [no es iterable]", lambda: se.Secuencia(-5)),
+        ("Secuencia([\"texto\"])    [no son Empleados]", lambda: se.Secuencia(["texto"])),
         ("Secuencia(1, 2)         [demasiados parametros]", lambda: se.Secuencia(1, 2)),
     ]
     for descripcion, accion in pruebas:
