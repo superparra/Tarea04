@@ -274,6 +274,27 @@ class Lista:
         """
         return self.eliminar_si(lambda dato: dato == elemento, maximo)
 
+    def reemplazar(self, elemento: Any, nuevo: Any, maximo: Optional[int] = None) -> int:
+        """
+        Método que actualiza apariciones del elemento, cambiando el dato del nodo
+        por el nuevo valor. No se re-enlaza ningún nodo, solo se modifica su dato,
+        por lo que el orden de la lista se conserva.
+        :param elemento: El elemento a buscar
+        :param nuevo: El valor con el que se reemplaza
+        :param maximo: (Opcional) Número máximo de apariciones a reemplazar.
+                       Si es None se reemplazan todas.
+        :return: El número de elementos reemplazados
+        :rtype: int
+        """
+        reemplazados = 0
+        actual = self.__centinela.siguiente
+        while actual is not None and (maximo is None or reemplazados < maximo):
+            if actual.dato == elemento:
+                actual.dato = nuevo
+                reemplazados += 1
+            actual = actual.siguiente
+        return reemplazados
+
     def vaciar(self):
         """
         Método que elimina todos los elementos de la lista. Basta con desconectar

@@ -118,6 +118,30 @@ class Secuencia(s.Secuenciable):
         por_quitar = total if nrep is None else nrep
         self.__datos.eliminar(elemento, por_quitar)
 
+    def actualizar(self, elemento: e.Empleado, nuevo: e.Empleado, nrep: int | None = None) -> int:
+        """
+        Actualiza (reemplaza) un Empleado de la Secuencia por otro, conservando su posición.
+        Sin nrep: actualiza todas las repeticiones del elemento.
+        Con nrep: actualiza nrep repeticiones; si hay menos de nrep, no hace nada
+        (misma regla que eliminar).
+        Se recorren los nodos de la lista y solo se cambia su dato.
+        :param elemento: El Empleado que se desea actualizar
+        :param nuevo: El Empleado con los datos actualizados
+        :param nrep: (Opcional) Número de repeticiones a actualizar
+        :return: El número de Empleados actualizados
+        :rtype: int
+        :raises TypeError: si elemento o nuevo no son Empleado
+        :raises ValueError: si nrep no es un entero positivo
+        """
+        if not isinstance(elemento, e.Empleado) or not isinstance(nuevo, e.Empleado):
+            raise TypeError("Solo se pueden actualizar objetos Empleado")
+        if nrep is not None and (not isinstance(nrep, int) or isinstance(nrep, bool) or nrep < 1):
+            raise ValueError("nrep debe ser un entero positivo")
+        total = self.repeticiones(elemento)
+        if total == 0 or (nrep is not None and total < nrep):
+            return 0
+        return self.__datos.reemplazar(elemento, nuevo, total if nrep is None else nrep)
+
     def contiene(self, elemento: e.Empleado) -> bool:
         """
         Indica si el elemento está en la Secuencia (recorrido con el iterador).

@@ -56,6 +56,12 @@ def probar_secuencia():
     assert sec.repeticiones(a) == 0 and sec.cardinalidad() == 1
     assert sec.obtener(0) == b
 
+    # Actualización: conserva la posición y respeta la regla de nrep
+    b2 = e.Empleado("Beto", "Ruiz", date(1980, 1, 10), "beto.nuevo@empresa.com", 2, 18000)
+    assert sec.actualizar(b, b2) == 1 and sec.obtener(0) == b2 and not sec.contiene(b)
+    assert sec.actualizar(b2, b, 3) == 0 and sec.obtener(0) == b2   # hay menos de 3
+    sec.actualizar(b2, b)
+
     sec.agregar(a, 2)
     unica = sec.secuencia_unica()
     assert unica.cardinalidad() == 2

@@ -133,9 +133,8 @@ def mostrar_elementos_secuencia(secuencia: se.Secuencia):
         return
     print(f"\nTotal de elementos en la Secuencia: {secuencia.nd}")
     print("-" * 70)
-    for i in range(secuencia.nd):
-        emp = secuencia.datos[i]
-        print(f"  [{i + 1:02d}] {emp}")
+    for i, emp in enumerate(secuencia, start=1):  # recorrido con el iterador de la lista
+        print(f"  [{i:02d}] {emp}")
     print("-" * 70)
 
 

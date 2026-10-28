@@ -44,6 +44,7 @@ En esta versión el almacenamiento es una **lista simplemente ligada con nodo ce
 | `__particion(...)` | Sí | No | Sin cambios: trabaja sobre el arreglo auxiliar que crea `ordenar`. |
 | `__quick_sort(...)` | Sí | No | Sin cambios: trabaja sobre el arreglo auxiliar que crea `ordenar`. |
 | — | **Nuevo** | — | `obtener(indice)`: regresa el empleado en una posición recorriendo la lista. Lo usa el menú para elegir empleados por número. |
+| — | **Nuevo** | — | `actualizar(elemento, nuevo, nrep=None)`: reemplaza un empleado por otro en su misma posición. Solo cambia el dato del nodo, no se re-enlaza nada. Sigue la misma regla de `nrep` que `eliminar`. La versión con arreglos no tenía método de actualización. |
 
 ## Métodos de la nueva estructura `Lista` (ListaCentinela.py)
 
@@ -52,6 +53,7 @@ En esta versión el almacenamiento es una **lista simplemente ligada con nodo ce
 | `agregar(e)` | O(1) | Inserta al final (usa la referencia al último nodo). |
 | `agregar_inicio(e)` | O(1) | Inserta después del centinela. |
 | `eliminar(e, maximo=1)` / `eliminar_si(cond, maximo)` | O(n) | Elimina en una pasada, empezando en el centinela. |
+| `reemplazar(e, nuevo, maximo)` | O(n) | Actualiza el dato de los nodos que coinciden. |
 | `contiene(e)`, `obtener(i)` / `[i]` | O(n) | Recorren los nodos. |
 | `esta_vacia()`, `longitud()` / `len()` | O(1) | Revisan el centinela o el contador. |
 | `vaciar()` | O(1) | Desconecta el centinela. |
@@ -61,5 +63,5 @@ En esta versión el almacenamiento es una **lista simplemente ligada con nodo ce
 
 | Archivo | Cambio |
 |---|---|
-| `MenuSecuenciaEmp.py` | Las opciones 15, 17 y 18 usaban `Secuencia(n)` con capacidad. Ahora usan `Secuencia()` o el constructor de copia `Secuencia(secuencia)`. En la opción 15, la copia invertida se arma recorriendo con el iterador. |
+| `MenuSecuenciaEmp.py` | Las opciones 15, 17 y 18 usaban `Secuencia(n)` con capacidad. Ahora usan `Secuencia()` o el constructor de copia `Secuencia(secuencia)`. En la opción 15, la copia invertida se arma recorriendo con el iterador. `mostrar_elementos_secuencia` ahora recorre con el iterador en lugar de `datos[i]`, que con la lista sería O(n²). |
 | `Empleado.py`, `Persona.py`, `Secuenciable.py` | Sin cambios: la interfaz del TAD se conserva. |
