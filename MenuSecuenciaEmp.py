@@ -13,6 +13,7 @@ import numpy as np
 
 import Empleado as e
 import SecuenciaEmpleado as se
+import ListaOrdenada as lo
 
 # ==============================================================================
 # FUNCIONES AUXILIARES DE ENTRADA Y FORMATEO
@@ -412,34 +413,39 @@ def opcion_secuencia_unica(secuencia: se.Secuencia):
         except NotImplementedError:
             print("  [Aviso]: El método de secuencia única arrojó NotImplementedError.")
 
-
 def opcion_ordenar(secuencia: se.Secuencia):
-    imprimir_encabezado("Opción 12: Ordenar la Secuencia")
+    """
+    Opción 12 del menú: muestra la Secuencia ordenada. Recorre la Secuencia con su
+    iterador, inserta cada Empleado en una Lista Ordenada (con el comparador que
+    elija el usuario) y luego recorre esa lista, también con su iterador, para imprimir.
+    :param secuencia: Secuencia que se desea mostrar ordenada
+    """
+    imprimir_encabezado("Opción 12: Mostrar la Secuencia Ordenada (Lista Ordenada)")
     if secuencia.nd == 0:
         print("  [Aviso]: La secuencia está vacía, no hay elementos para ordenar.")
         return
 
     print("Seleccione el criterio de ordenamiento:")
-    print("  1. Ordenar por Salario y Nombre (usando QuickSort)")
-    print("  2. Ordenar por Edad (usando QuickSort)")
+    print("  1. Por Salario y Nombre")
+    print("  2. Por Edad")
     opc = input("  Elija una opción [1/2]: ").strip()
-
     if opc == "1":
-        print("\n  -> Ordenando por Salario y Nombre...")
-        arreglo_ordenado = secuencia.ordenar(se.Secuencia.nombre_salario)
+        comparador = se.Secuencia.nombre_salario
     elif opc == "2":
-        print("\n  -> Ordenando por Edad...")
-        arreglo_ordenado = secuencia.ordenar(se.Secuencia.edad)
+        comparador = se.Secuencia.edad
     else:
         print("  [Error]: Criterio no válido.")
         return
 
-    print(f"\n  Elementos ordenados (Total: {secuencia.nd}):")
-    print("-" * 70)
-    for i in range(secuencia.nd):
-        print(f"  [{i + 1:02d}] {arreglo_ordenado[i]}")
-    print("-" * 70)
+    ordenada = lo.ListaOrdenada(comparador)
+    for empleado in secuencia:          # iterador de la Secuencia
+        ordenada.agregar(empleado)
 
+    print(f"\n  Elementos ordenados (Total: {len(ordenada)}):")
+    print("-" * 70)
+    for i, empleado in enumerate(ordenada, start=1):   # iterador de la Lista Ordenada
+        print(f"  [{i:02d}] {empleado}")
+    print("-" * 70)
 
 def opcion_recorrer_iterador(secuencia: se.Secuencia):
     imprimir_encabezado("Opción 13: Recorrer Colección con Iterador [10 Puntos Extra]")
@@ -559,6 +565,33 @@ def opcion_probar_excepciones(secuencia: se.Secuencia):
 # ==============================================================================
 # MENÚ PRINCIPAL
 # ==============================================================================
+def menu_inicio() -> tuple:
+    """
+    Pregunta al usuario cómo desea comenzar: con una Secuencia en blanco o
+    cargando los empleados desde un archivo CSV (solicitando su nombre).
+    :return: Tupla (secuencia, archivo_origen). archivo_origen es None si se
+             comenzó en blanco, o la ruta del archivo si se cargaron datos.
+    :rtype: tuple.
+    """
+    while True:
+        imprimir_encabezado("¿Cómo desea comenzar?")
+        print("  1. Secuencia en blanco (sin empleados)")
+        print("  2. Cargar datos desde un archivo CSV")
+        opcion = input("  Elija una opción [1/2]: ").strip()
+        if opcion == "1":
+            return se.Secuencia(), None
+        if opcion == "2":
+            ruta = capturar_cadena("  Nombre del archivo a leer: ")
+            secuencia = se.Secuencia()
+            try:
+                cargar_desde_archivo(ruta, secuencia)
+                return secuencia, ruta
+            except FileNotFoundError:
+                print(f"  [Error]: El archivo '{ruta}' no fue encontrado. Intente de nuevo.")
+            except Exception as err:
+                print(f"  [Error al leer el archivo]: {err}")
+        else:
+            print(" [Error]: Opción no válida.")
 
 def mostrar_menu():
     """Despliega las opciones del menú interactivo."""
