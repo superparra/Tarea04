@@ -4,8 +4,9 @@
 # Integrante 2 - Tarea 4
 
 from ListaOrdenada import ListaOrdenada
-from Directorio import Directorio                           # Integrante 1
-from Persistencia import cargar_desde_csv, guardar_en_csv   # Integrante 3
+from Directorio import Directorio
+from MenuSecuenciaEmp import cargar_desde_archivo as cargar_desde_csv   # Integrante 3
+from MenuSecuenciaEmp import guardar_al_salir as guardar_persistente    # Integrante 3
 
 
 # ==============================================================================
@@ -184,7 +185,7 @@ def guardar_al_salir(directorio: Directorio, ruta_origen):
         ruta = input(" Nombre del archivo .csv donde guardar: ").strip()
         if not ruta.lower().endswith(".csv"):
             ruta += ".csv"
-    guardar_en_csv(ruta, directorio)             # Integrante 3
+    guardar_persistente(directorio, ruta)        # Integrante 3: (coleccion, ruta)
 
 
 def main():
