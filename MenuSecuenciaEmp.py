@@ -220,9 +220,6 @@ def guardar_en_archivo(ruta: str, secuencia: se.Secuencia) -> bool:
     :param secuencia: Instancia de Secuencia
     :return: True si se guardó exitosamente
     """
-    if secuencia.nd == 0:
-        print("  [Aviso]: La secuencia está vacía, no hay datos para exportar.")
-        return False
 
     with open(ruta, mode="w", newline="", encoding="utf-8") as f:
         escritor = csv.writer(f, delimiter=",")
@@ -238,6 +235,44 @@ def guardar_en_archivo(ruta: str, secuencia: se.Secuencia) -> bool:
 
     print(f"  [Éxito]: Se guardaron {total_escritos} empleados en '{ruta}'.")
     return True
+
+def pedir_nombre_csv() -> str:
+    """
+    Solicita al usuario el nombre del archivo .csv donde se guardarán los datos.
+    Si el nombre no termina en '.csv', se le agrega la extension.
+    :return: El nombre del archivo con extension .csv
+    :rtype: str
+    """
+    nombre = capturar_cadena("  Nombre del archivo .csv donde se guardarán los datos: ")
+    if not nombre.lower().endswith(".csv"):
+        nombre += ".csv"
+    return nombre
+
+
+def guardar_al_salir(secuencia: se.Secuencia, archivo_origen: Optional[str] = None) -> Optional[str]:
+
+    """
+    Guarda automaticamente el directorio al terminar la ejecucion, recorriendo
+    la lista con su iterador.
+    Si el programa inició desde un archivo, se sobrescribe ese mismo archivo.
+    Si inicio con un directorio en blanco, se pide el nombre del nuevo .csv.
+    Si ademas el directorio quedo vacio, no hay nada que guardar.
+    :param secuencia: La Secuencia (directorio) con los cambios de la sesion
+    :param archivo_origen: Ruta del archivo con el que se inicio, o None si se inicio en blanco
+    :return: La ruta donde se guardo, o None si no se guardo
+    :rtype: str | None
+    """
+    if archivo_origen is None and secuencia.nd == 0:
+        print("  [Aviso]: El directorio esta vacio y no se cargo ningun archivo, entonces no se guardo nada.")
+        return None
+    try:
+        if archivo_origen is None:
+            archivo_origen = pedir_nombre_csv()
+        guardar_en_archivo(archivo_origen, secuencia)
+        return archivo_origen
+    except OSError as err:
+        print(f"  [Error al guardar]: {err}")
+        return None
 
 
 # ==============================================================================
@@ -627,21 +662,26 @@ def main():
     print("Iniciando Sistema de Gestión de Secuencia de Empleados...")
     secuencia = se.Secuencia()
 
-    # Opciones de prueba rápida: si existe 'empleados.csv', ofrecer cargarlo al iniciar
+    archivo_origen = None  # Archivo con el que se inició (None = directorio en blanco)
+
     if os.path.exists("empleados.csv") and secuencia.nd == 0:
         auto = input("Se detectó 'empleados.csv'. ¿Desea cargarlo al iniciar? [S/n]: ").strip().lower()
         if auto in ("", "s", "si", "sí", "y", "yes"):
             try:
                 cargar_desde_archivo("empleados.csv", secuencia)
+                archivo_origen = "empleados.csv"
             except Exception as e_err:
                 print(f"Error al precargar: {e_err}")
 
     while True:
         mostrar_menu()
-        opcion = input("Seleccione una opción: ").strip()
+        try:
+            opcion = input("Seleccione una opción: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n  [Interrupción detectada: se guardará antes de salir]")
+            break
 
         if opcion in ("0", "00", "salir", "exit"):
-            print("\n¡Gracias por utilizar el Sistema de TAD Secuencia! Hasta pronto.\n")
             break
         elif opcion in ("1", "01"):
             opcion_cargar_archivo(secuencia)
@@ -683,6 +723,10 @@ def main():
             print("  [Error]: Opción no válida. Por favor elija un número del menú.")
 
         input("\nPresione [Enter] para continuar...")
+
+    print("\n--- Guardado automático ---")
+    guardar_al_salir(secuencia, archivo_origen)
+    print("\n¡Gracias por utilizar el Sistema de TAD Secuencia! Hasta pronto.\n")
 
 
 if __name__ == "__main__":
