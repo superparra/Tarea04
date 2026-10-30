@@ -660,18 +660,7 @@ def mostrar_menu():
 def main():
     """Función de inicio del programa del menú interactivo."""
     print("Iniciando Sistema de Gestión de Secuencia de Empleados...")
-    secuencia = se.Secuencia()
-
-    archivo_origen = None  # Archivo con el que se inició (None = directorio en blanco)
-
-    if os.path.exists("empleados.csv") and secuencia.nd == 0:
-        auto = input("Se detectó 'empleados.csv'. ¿Desea cargarlo al iniciar? [S/n]: ").strip().lower()
-        if auto in ("", "s", "si", "sí", "y", "yes"):
-            try:
-                cargar_desde_archivo("empleados.csv", secuencia)
-                archivo_origen = "empleados.csv"
-            except Exception as e_err:
-                print(f"Error al precargar: {e_err}")
+    secuencia, archivo_origen = menu_inicio()
 
     while True:
         mostrar_menu()

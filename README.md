@@ -6,11 +6,11 @@ Esta tarea parte de la Tarea 3 ([jcaessar/Tarea03](https://github.com/jcaessar/T
 
 ## Problema 1: Directorio con listas
 
-| Integrante         | Parte | Estado |
-|--------------------|---|--|
-| 1 (Emiliano Parra) | Migración a lista simplemente ligada con centinela + tabla comparativa | ✅ Hecho |
-| 2                  | Lista Ordenada para mostrar datos ordenados + menú de inicio (directorio en blanco o desde archivo) | Pendiente |
-| 3 (Yoichi Servin)  | Persistencia CSV: carga inicial y guardado automático al salir | ✅ Hecho |
+| Integrante         | Parte                                                                                               | Estado     |
+|--------------------|-----------------------------------------------------------------------------------------------------|------------|
+| 1 (Emiliano Parra) | Migración a lista simplemente ligada con centinela + tabla comparativa                              | ✅ Hecho   |
+| 2  (Enzo Olvera)   | Lista Ordenada para mostrar datos ordenados + menú de inicio (directorio en blanco o desde archivo) | ✅Hecho    |
+| 3 (Yoichi Servin)  | Persistencia CSV: carga inicial y guardado automático al salir                                      | ✅ Hecho   |
 
 ## Problema 2: Pilas de libros
 
